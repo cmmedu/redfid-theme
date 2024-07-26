@@ -1,3 +1,2 @@
 -e git+https://github.com/eol-uchile/eol_duplicate_xblock@bdd3f406521cb028c142eb29e6c3c9c6433bba49#egg=eol_duplicate_xblock
 -e git+https://github.com/eol-uchile/eol_jump_to@bdbb1fca8ae0e0e7e8d6c38641975942ea9f154e#egg=eol_jump_to
--e git+https://github.com/eol-uchile/redfid_logout@bb679f20d510d0815bc67a4d403c5555f5b52d62#egg=redfid_logout
