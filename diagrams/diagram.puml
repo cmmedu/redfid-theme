@@ -16,13 +16,9 @@ System_Boundary(c1, "edx-platform: norteamericano-edx", $link="https://github.co
         
             System_Boundary(apps, "apps", $link="https://github.com/eol-virtuallabx/norteamericano-edx/blob/vlabx-release/koa/requirements/apps.txt") {
             
-                Container(apps1, "eol_auto_login", $link="https://github.com/eol-uchile/eol_auto_login")
+                Container(apps1, "eol_duplicate_xblock", $link="https://github.com/eol-uchile/eol_duplicate_xblock")
             
-                Container(apps2, "eol_duplicate_xblock", $link="https://github.com/eol-uchile/eol_duplicate_xblock")
-            
-                Container(apps3, "eol_jump_to", $link="https://github.com/eol-uchile/eol_jump_to")
-            
-                Container(apps4, "redfid_logout", $link="https://github.com/eol-uchile/redfid_logout")
+                Container(apps2, "eol_jump_to", $link="https://github.com/eol-uchile/eol_jump_to")
             
             }
         
