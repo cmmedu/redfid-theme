@@ -19,19 +19,19 @@
                 continue
 
             course_redfid_id = parts[1]
+            course_year = parts[2]
 
             # Cut the string based on the last underscore index
             if "MODULO1REDFID" in course_redfid_id or "REDFID_XXX_ELEAR_SLF" in course_redfid_id or "REDFID_IPD_ELEAR_SLF" in course_redfid_id:
                 course_identifier = "REDFID_IPD_ELEAR_SLF"
                 if "MODULO1REDFID" in course_redfid_id:
-                    section_identifier = '01'
+                    section_identifier = '2022_2'
                 else:
-                    last_underscore_index = course_redfid_id.rfind('_')
-                    section_identifier = course_redfid_id[last_underscore_index + 1:]
+                    section_identifier = course_year
             else:
                 last_underscore_index = course_redfid_id.rfind('_')
                 course_identifier = course_redfid_id[:last_underscore_index]
-                section_identifier = course_redfid_id[last_underscore_index + 1:]
+                section_identifier = course_year
 
             if course_identifier not in latest_courses.keys():
                 latest_courses[course_identifier] = {'course': course, 'section': section_identifier}

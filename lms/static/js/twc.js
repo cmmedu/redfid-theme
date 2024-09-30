@@ -45,7 +45,8 @@ function showVideoCurso(displayId) {
     $("#dashboard-main").hide();
     const ipd = [
         "redfid+MODULO1REDFID+2022",
-        "redfid+REDFID_IPD_ELEAR_SLF_02+2023_2"
+        "redfid+REDFID_IPD_ELEAR_SLF_02+2023_2",
+        "redfid+REDFID_IPD_ELEAR_SLF_01+2024_2"
     ];
     if (ipd.includes(displayId)) {
         $("#twc-main").html(`
