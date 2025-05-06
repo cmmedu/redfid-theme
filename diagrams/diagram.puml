@@ -92,9 +92,7 @@ System_Boundary(c1, "edx-platform: norteamericano-edx", $link="https://github.co
 
     System_Boundary(theme, "Themes", $link="https://github.com/eol-virtuallabx/norteamericano-edx/blob/vlabx-release/koa/themes/") {
         
-            Container(theme1, "norteamericano-theme", $link="https://github.com/eol-virtuallabx/norteamericano-theme")
-        
-            Container(theme2, "redfid-theme", $link="https://github.com/eol-uchile/redfid-theme")
+            Container(theme1, "redfid-theme", $link="https://github.com/eol-uchile/redfid-theme")
         
     }
 
