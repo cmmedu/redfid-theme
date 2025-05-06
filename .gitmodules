@@ -1,6 +1,3 @@
-[submodule "themes/norteamericano-theme"]
-	path = themes/norteamericano-theme
-	url = https://github.com/eol-virtuallabx/norteamericano-theme
 [submodule "themes/redfid-theme"]
 	path = themes/redfid-theme
 	url = https://github.com/eol-uchile/redfid-theme
