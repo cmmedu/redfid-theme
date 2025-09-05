@@ -23,8 +23,8 @@ jobs:
         with:
           app-id: ${{ inputs.app_id || vars.EOLITO_BOT_APP_ID }}
           private-key: ${{ secrets.private_key || secrets.EOLITO_BOT_PRIVATE_KEY }}
-          owner: eol-virtuallabx
-          repositories: edx-argocd
+          owner: eol-uchile
+          repositories: edx-kustomize
 
       - name: Trigger argoCD repository workflow
         run: |
