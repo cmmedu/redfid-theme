@@ -5,7 +5,7 @@
 -e git+https://github.com/eol-uchile/xblock-drag-and-drop-v2@58d8a691cf9210220925f3d2957b39a377f6704c#egg=xblock-drag-and-drop-v2
 -e git+https://github.com/eol-uchile/flow-control-xblock@4e275efba4e37d9371a27df4997c692c0b40d281#egg=flow-control-xblock
 -e git+https://github.com/eol-uchile/free-text-response@eec58e583bde6aa5098230e4c74a1e59fb9f7702#egg=free-text-response
--e git+https://github.com/eol-uchile/iaa-xblock@9f212e89968f6734a6cdda1c68adbfd1afa6462a#egg=iaa-xblock
+-e git+https://github.com/REDFID/iaa-xblock@v0.0.1#egg=iaa-xblock
 -e git+https://github.com/eol-uchile/xblock-in-video-quiz@1555dcbd96341f19b76f915f0135f46192869796#egg=xblock_in_video_quiz
 -e git+https://github.com/eol-uchile/eol_list_grade@0d7688919bad8b229bff2948f31fedd76f1029d2#egg=eol_list_grade
 -e git+https://github.com/eol-uchile/xblock-lti-consumer@b1384343be9ae1a4d6de5760a3a5c1475a3024cf#egg=lti-consumer-xblock
