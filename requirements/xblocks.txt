@@ -15,6 +15,5 @@
 -e git+https://github.com/eol-uchile/eol-question-xblock.git@035d1eaca888d16c2c28f3ac28b985bd4cac74b0#egg=eolquestion-xblock
 -e git+https://github.com/eol-uchile/edx_xblock_scorm@c23184c0e22a7847f0b0c917bbe431c2973770fb#egg=scormxblock
 -e git+https://github.com/eol-uchile/edx-sga@ee43f7993e6a81626fc3a4666cfa09fe3c2140cb#egg=edx-sga
--e git+https://github.com/eol-uchile/ubcpi@ae4bac403c89fd6c6525cedb7171a66e3aefca4c#egg=ubcpi
 -e git+https://github.com/eol-uchile/eol-vof-xblock.git@aa28eb44ff03a4243cee1d814e32cd4b5fc1f972#egg=vof-xblock
 -e git+https://github.com/cmmedu/iterative-xblock.git@55549592fabcb4962b93682f6fc4379f0332503b#egg=iterative-xblock
