@@ -80,11 +80,9 @@ System_Boundary(c1, "edx-platform: edx-redfid", $link="https://github.com/eol-uc
             
                 Container(xblocks17, "edx-sga", $link="https://github.com/eol-uchile/edx-sga/commit/ee43f7993e6a81626fc3a4666cfa09fe3c2140cb")
             
-                Container(xblocks18, "ubcpi", $link="https://github.com/eol-uchile/ubcpi/commit/ae4bac403c89fd6c6525cedb7171a66e3aefca4c")
+                Container(xblocks18, "vof-xblock", $link="https://github.com/eol-uchile/eol-vof-xblock.git/commit/aa28eb44ff03a4243cee1d814e32cd4b5fc1f972")
             
-                Container(xblocks19, "vof-xblock", $link="https://github.com/eol-uchile/eol-vof-xblock.git/commit/aa28eb44ff03a4243cee1d814e32cd4b5fc1f972")
-            
-                Container(xblocks20, "iterative-xblock", $link="https://github.com/cmmedu/iterative-xblock.git/commit/55549592fabcb4962b93682f6fc4379f0332503b")
+                Container(xblocks19, "iterative-xblock", $link="https://github.com/cmmedu/iterative-xblock.git/commit/55549592fabcb4962b93682f6fc4379f0332503b")
             
             }
         
