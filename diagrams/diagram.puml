@@ -16,7 +16,7 @@ System_Boundary(c1, "edx-platform: edx-redfid", $link="https://github.com/eol-uc
         
             System_Boundary(apps, "apps", $link="https://github.com/eol-uchile/edx-redfid/blob/vlabx-release/koa/requirements/apps.txt") {
             
-                Container(apps1, "eol_duplicate_xblock", $link="https://github.com/eol-uchile/eol_duplicate_xblock/commit/bdd3f406521cb028c142eb29e6c3c9c6433bba49")
+                Container(apps1, "eol_duplicate_xblock", $link="https://github.com/eol-uchile/eol_duplicate_xblock/releases/tag/1.0.0")
             
                 Container(apps2, "eol_jump_to", $link="https://github.com/eol-uchile/eol_jump_to/commit/bdbb1fca8ae0e0e7e8d6c38641975942ea9f154e")
             
