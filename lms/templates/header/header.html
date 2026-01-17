@@ -7,10 +7,14 @@
 <%!
 from django.urls import reverse
 from django.utils.translation import ugettext as _
+from django.utils.http import urlquote
 import waffle
+import json
 
 from lms.djangoapps.ccx.overrides import get_current_ccx
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangolib.js_utils import js_escaped_string
 
 # App that handles subdomain specific branding
 from lms.djangoapps.branding import api as branding_api
@@ -43,7 +47,185 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 % endif
 
 <header id="header">
+    <%
+        api_url = configuration_helpers.get_value('redfid_api_url', '')
+    %>
+    <script>
+        var api_url = "${api_url | n, js_escaped_string}";
+        window.api_url = api_url;
+    </script>
     <script src="${static.url('js/header.js')}"></script>
+    % if user.is_authenticated:
+    <%
+        self.real_user = getattr(user, 'real_user', user)
+        username = self.real_user.username
+    %>
+    <script>
+        (function() {
+            var username = "${username | n, js_escaped_string}";
+            
+            function loadUserImages() {
+                var userIcons = document.querySelectorAll('.header-usericon');
+                
+                if (userIcons.length === 0) {
+                    // Elements not ready yet, try again after a short delay
+                    setTimeout(loadUserImages, 100);
+                    return;
+                }
+            
+                // Fetch user image from API
+                fetch(api_url + '/user-image/' + username)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    var imageUrl = data.url;
+                    
+                    if (!imageUrl || imageUrl === '' || imageUrl === null) {
+                        // If no URL, show the same as when not logged in, but with #bdbdbd background
+                        userIcons.forEach(function(icon) {
+                            var parent = icon.parentElement;
+                            if (parent) {
+                                // Replace img with SVG icon
+                                icon.style.display = 'none';
+                                var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                svg.setAttribute('class', 'toggle-user-menu');
+                                svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                                svg.setAttribute('style', 'padding-left: 1px;');
+                                svg.setAttribute('width', '16px');
+                                svg.setAttribute('height', '16px');
+                                svg.setAttribute('aria-hidden', 'true');
+                                svg.setAttribute('focusable', 'false');
+                                svg.setAttribute('viewBox', '0 0 512 512');
+                                
+                                var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                path.setAttribute('fill', 'white');
+                                path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                                svg.appendChild(path);
+                                
+                                // Update parent background color
+                                if (parent.style) {
+                                    parent.style.backgroundColor = '#bdbdbd';
+                                    parent.style.width = '40px';
+                                    parent.style.height = '40px';
+                                    parent.style.display = 'flex';
+                                    parent.style.alignItems = 'center';
+                                    parent.style.justifyContent = 'center';
+                                    parent.style.borderRadius = '50%';
+                                }
+                                
+                                parent.appendChild(svg);
+                            }
+                        });
+                    } else {
+                        // If URL exists, load the image
+                        var fullImageUrl = 'https://static.redfid.cl/api/users' + imageUrl;
+                        userIcons.forEach(function(icon) {
+                            var parent = icon.parentElement;
+                            // Ensure parent has proper styling for image display
+                            if (parent && parent.style) {
+                                parent.style.width = '40px';
+                                parent.style.height = '40px';
+                                parent.style.borderRadius = '50%';
+                                parent.style.overflow = 'hidden';
+                                parent.style.display = 'flex';
+                                parent.style.alignItems = 'center';
+                                parent.style.justifyContent = 'center';
+                                // Remove the default background color
+                                parent.style.backgroundColor = '';
+                            }
+                            icon.src = fullImageUrl;
+                            icon.style.display = '';
+                            icon.style.width = '40px';
+                            icon.style.height = '40px';
+                            icon.style.objectFit = 'cover';
+                            icon.onerror = function() {
+                                // Fallback to default icon if image fails to load
+                                this.style.display = 'none';
+                                var parent = this.parentElement;
+                                if (parent) {
+                                    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                    svg.setAttribute('class', 'toggle-user-menu');
+                                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                                    svg.setAttribute('style', 'padding-left: 1px;');
+                                    svg.setAttribute('width', '16px');
+                                    svg.setAttribute('height', '16px');
+                                    svg.setAttribute('aria-hidden', 'true');
+                                    svg.setAttribute('focusable', 'false');
+                                    svg.setAttribute('viewBox', '0 0 512 512');
+                                    
+                                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                    path.setAttribute('fill', 'white');
+                                    path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                                    svg.appendChild(path);
+                                    
+                                    if (parent.style) {
+                                        parent.style.backgroundColor = '#bdbdbd';
+                                        parent.style.width = '40px';
+                                        parent.style.height = '40px';
+                                        parent.style.display = 'flex';
+                                        parent.style.alignItems = 'center';
+                                        parent.style.justifyContent = 'center';
+                                        parent.style.borderRadius = '50%';
+                                    }
+                                    
+                                    parent.appendChild(svg);
+                                }
+                            };
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error fetching user image:', error);
+                    // On error, show default icon with #bdbdbd background
+                    userIcons.forEach(function(icon) {
+                        icon.style.display = 'none';
+                        var parent = icon.parentElement;
+                        if (parent) {
+                            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            svg.setAttribute('class', 'toggle-user-menu');
+                            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                            svg.setAttribute('style', 'padding-left: 1px;');
+                            svg.setAttribute('width', '16px');
+                            svg.setAttribute('height', '16px');
+                            svg.setAttribute('aria-hidden', 'true');
+                            svg.setAttribute('focusable', 'false');
+                            svg.setAttribute('viewBox', '0 0 512 512');
+                            
+                            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            path.setAttribute('fill', 'white');
+                            path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                            svg.appendChild(path);
+                            
+                            if (parent.style) {
+                                parent.style.backgroundColor = '#bdbdbd';
+                                parent.style.width = '40px';
+                                parent.style.height = '40px';
+                                parent.style.display = 'flex';
+                                parent.style.alignItems = 'center';
+                                parent.style.justifyContent = 'center';
+                                parent.style.borderRadius = '50%';
+                            }
+                            
+                            parent.appendChild(svg);
+                        }
+                    });
+                });
+            }
+            
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadUserImages);
+            } else {
+                // DOM is already ready
+                loadUserImages();
+            }
+        })();
+    </script>
+    % endif
     <div class="header-bar"></div>
     <div style="box-shadow: 0px 6px 4px -4px #cccccc; position: relative; z-index: 100;">
         <div class="header-container">
@@ -72,7 +254,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
             </div>
             % if user.is_authenticated:
                 <div class="toggle-user-menu">
-                    <a class="toggle-user-menu header-navigation-logo-mobile" target="_self">
+                    <a class="toggle-user-menu header-navigation-logo-mobile" href="#" target="_self" onclick="return false;">
                         <img class="toggle-user-menu header-usericon" src="">
                     </a>
                 </div>
@@ -89,12 +271,12 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
             <div class="header-login-container">
                 % if user.is_authenticated:
                 <div class="toggle-user-menu">
-                    <a class="toggle-user-menu time-to-get-ill" style="background-color: #40b4ba; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" target="_self">
+                    <a class="toggle-user-menu time-to-get-ill" href="#" style="background-color: #40b4ba; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" target="_self" onclick="return false;">
                         <img class="toggle-user-menu header-usericon" src="">
                     </a>
                 </div>
                 % else:
-                <a class="register-button" href="https://www.redfid.cl/formulario-de-registro" target="_self">Registrarse</a>
+                <a class="register-button" href="https://www.redfid.cl/formulario-de-registro" target="_self">Regístrate</a>
                 <div class="toggle-user-menu time-to-get-ill" style="background-color: #40b4ba; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
                     <svg class="toggle-user-menu" xmlns="http://www.w3.org/2000/svg" style="padding-left: 1px;" width="16px" height="16px" aria-hidden="true" focusable="false" viewBox="0 0 512 512">
                       <path
@@ -107,19 +289,23 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
             </div>
         </div>
     </div>
+    <%
+    current_path = request.path if request else '/'
+    redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}"
+    %>
     <div class="header-user-container-mobile" style="display: none;">
         % if user.is_authenticated:
-        <a class="header-navigation-link-mobile" href="https://auth.redfid.cl/realms/REDFID/account/" target="_self">
-            Cuenta (${user.username})
+        <a class="header-navigation-link-mobile" href="https://www.redfid.cl/perfil" target="_self">
+            <i class="fa fa-user" style="color: #40b4ba; margin-right: 8px;"></i>Perfil
         </a>
-        <a class="header-navigation-link-mobile" href="${reverse('redfid_edx_api:logout_get')}" target="_self">
-            Cerrar sesión
+        <a class="header-navigation-link-mobile" href="/logout" target="_self">
+            <i class="fa fa-sign-out" style="color: #40b4ba; margin-right: 8px;"></i>Cerrar sesión
         </a>
         % else:
         <a class="header-navigation-link-mobile" href="https://www.redfid.cl/formulario-de-registro" target="_self">
             Regístrate
         </a>
-        <a class="header-navigation-link-mobile" href="/auth/login/tpa-saml/?auth_entry=login&next=%2F&idp=default" target="_self">
+        <a class="header-navigation-link-mobile" href="${redfid_login_url}" target="_self">
             Iniciar sesión
         </a>
         % endif
@@ -141,40 +327,6 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
             Noticias y Eventos
         </a>
     </div>
-    <script>
-        window.onload = function() {
-            function updateUserIcon(username) {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'https://api.redfid.cl/get_user_image_url/' + username, true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.status === 100) {
-                            var icons = document.querySelectorAll('.header-usericon')
-                            icons.forEach(function(icon) {
-                                icon.src = response.url;
-                            });
-                        } else {
-                            var icons = document.querySelectorAll('.header-usericon')
-                            icons.forEach(function(icon) {
-                                icon.src = "/static/redfid-theme/images/nouser.png"
-                            });
-                        }
-                    } else if (xhr.readyState === 4) {
-                        var icons = document.querySelectorAll('.header-usericon')
-                        icons.forEach(function(icon) {
-                            icon.src = "/static/redfid-theme/images/nouser.png"
-                        });
-                    }
-                };
-                xhr.send();
-            }
-            let username = "${user.username}";
-            if (username) {
-                updateUserIcon(username);
-            }
-        };
-    </script>
 </header>
 
 % if course:

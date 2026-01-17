@@ -9,6 +9,7 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
+from django.utils.http import urlquote
 from six import text_type
 
 from openedx.core.djangoapps.user_authn.utils import should_redirect_to_logistration_mircrofrontend
@@ -56,13 +57,17 @@ from lms.djangoapps.branding import api as branding_api
     <div class="secondary">
       <div>
         % if allows_login:
+          <%
+            current_path = request.path if request else '/'
+            redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}"
+          %>
           % if should_redirect_to_logistration_mfe:
             <div class="mobile-nav-item hidden-mobile nav-item">
-                <a class="sign-in-btn btn" href="https://cursos.redfid.cl/auth/login/tpa-saml/?auth_entry=login&next=%2F&idp=default">${_("Sign in")}</a>
+                <a class="sign-in-btn btn" href="${redfid_login_url}">${_("Sign in")}</a>
             </div>
           % else:
             <div class="mobile-nav-item hidden-mobile nav-item">
-                <a class="sign-in-btn btn" href="https://cursos.redfid.cl/auth/login/tpa-saml/?auth_entry=login&next=%2F&idp=default">${_("Sign in")}</a>
+                <a class="sign-in-btn btn" href="${redfid_login_url}">${_("Sign in")}</a>
             </div>
           % endif
         % endif

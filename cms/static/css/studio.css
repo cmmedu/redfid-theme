@@ -148,7 +148,11 @@ header#header {
     top: 89px;
     right: calc(50% - 470px);
     background-color: #fff;
-    border: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    box-sizing: border-box;
     transition: all 0.3s ease;
 }
 
@@ -329,6 +333,10 @@ header#header {
 
 .header-navigation-link-mobile:hover {
     background-color: #40b4ba !important;
+    color: white !important;
+}
+
+.header-navigation-link-mobile:hover i {
     color: white !important;
 }
 

@@ -37,8 +37,7 @@
     % endfor
 </%block>
 <div class="section-bkg-wrapper">
-    <main id="main" aria-label="Content" tabindex="-1" style="margin-top: 40px !important">
-        <p class="sign-in-description-outside">Para acceder a este contenido, es necesario iniciar sesión con una cuenta RedFID.</p>
+    <main id="main" aria-label="Content" tabindex="-1">
         <div id="content-container" class="login-register-content">
             % if enable_enterprise_sidebar:
                 <%include file="enterprise_sidebar.html" />
@@ -50,8 +49,7 @@
                     border_class = ''
                 %>
             % endif
-            <a class="sign-in-button-outside" href="https://cursos.redfid.cl/auth/login/tpa-saml/?auth_entry=login&next=%2F&idp=default">Iniciar sesión</a>
+            <div id="login-and-registration-container" class="login-register ${border_class}"></div>
         </div>
-        <a class="register-button-outside" href="https://www.redfid.cl/formulario-de-registro/">Registrarse</a>
     </main>
 </div>
