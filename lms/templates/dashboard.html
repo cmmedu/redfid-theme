@@ -39,6 +39,16 @@ from common.djangoapps.student.models import CourseEnrollment
 </%block>
 
 <%block name="js_extra">
+  <%
+    api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+    static_url = configuration_helpers.get_value('REDFID_STATIC_URL', '')
+  %>
+  <script>
+    var api_url = "${api_url | n, js_escaped_string}";
+    window.api_url = api_url;
+    var static_url = "${static_url | n, js_escaped_string}";
+    window.static_url = static_url;
+  </script>
   <script src="${static.url('js/twc.js')}"></script>
   <script src="${static.url('js/commerce/credit.js')}"></script>
   <%static:js group='dashboard'/>

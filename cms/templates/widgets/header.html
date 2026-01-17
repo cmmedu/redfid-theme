@@ -13,185 +13,29 @@
   from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
   from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
   lms_base = configuration_helpers.get_value('LMS_BASE', settings.LMS_BASE)
-  api_url = configuration_helpers.get_value('redfid_api_url', '')
+  api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+  static_url = configuration_helpers.get_value('REDFID_STATIC_URL', '')
 %>
 <header id="header">
   <script>
     var api_url = "${api_url | n, js_escaped_string}";
     window.api_url = api_url;
+    var static_url = "${static_url | n, js_escaped_string}";
+    window.static_url = static_url;
+    var user_icon_url = "${static.url('assets/user-icon.svg') | n, js_escaped_string}";
+    window.user_icon_url = user_icon_url;
   </script>
-  <script src="${static.url('js/header.js')}"></script>
   % if user.is_authenticated:
   <%
       self.real_user = getattr(user, 'real_user', user)
       username = self.real_user.username
   %>
   <script>
-      (function() {
-          var username = "${username | n, js_escaped_string}";
-          
-          function loadUserImages() {
-              var userIcons = document.querySelectorAll('.header-usericon');
-              
-              if (userIcons.length === 0) {
-                  // Elements not ready yet, try again after a short delay
-                  setTimeout(loadUserImages, 100);
-                  return;
-              }
-          
-              // Fetch user image from API
-              fetch(api_url + '/user-image/' + username)
-              .then(function(response) {
-                  if (!response.ok) {
-                      throw new Error('Network response was not ok');
-                  }
-                  return response.json();
-              })
-              .then(function(data) {
-                  var imageUrl = data.url;
-                  
-                  if (!imageUrl || imageUrl === '' || imageUrl === null) {
-                      // If no URL, show the same as when not logged in, but with #bdbdbd background
-                      userIcons.forEach(function(icon) {
-                          var parent = icon.parentElement;
-                          if (parent) {
-                              // Replace img with SVG icon
-                              icon.style.display = 'none';
-                              var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                              svg.setAttribute('class', 'toggle-user-menu');
-                              svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-                              svg.setAttribute('style', 'padding-left: 1px;');
-                              svg.setAttribute('width', '16px');
-                              svg.setAttribute('height', '16px');
-                              svg.setAttribute('aria-hidden', 'true');
-                              svg.setAttribute('focusable', 'false');
-                              svg.setAttribute('viewBox', '0 0 512 512');
-                              
-                              var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                              path.setAttribute('fill', 'white');
-                              path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
-                              svg.appendChild(path);
-                              
-                              // Update parent background color
-                              if (parent.style) {
-                                  parent.style.backgroundColor = '#bdbdbd';
-                                  parent.style.width = '40px';
-                                  parent.style.height = '40px';
-                                  parent.style.display = 'flex';
-                                  parent.style.alignItems = 'center';
-                                  parent.style.justifyContent = 'center';
-                                  parent.style.borderRadius = '50%';
-                              }
-                              
-                              parent.appendChild(svg);
-                          }
-                      });
-                  } else {
-                      // If URL exists, load the image
-                      var fullImageUrl = 'https://static.redfid.cl/api/users' + imageUrl;
-                      userIcons.forEach(function(icon) {
-                          var parent = icon.parentElement;
-                          // Ensure parent has proper styling for image display
-                          if (parent && parent.style) {
-                              parent.style.width = '40px';
-                              parent.style.height = '40px';
-                              parent.style.borderRadius = '50%';
-                              parent.style.overflow = 'hidden';
-                              parent.style.display = 'flex';
-                              parent.style.alignItems = 'center';
-                              parent.style.justifyContent = 'center';
-                              // Remove the default background color
-                              parent.style.backgroundColor = '';
-                          }
-                          icon.src = fullImageUrl;
-                          icon.style.display = '';
-                          icon.style.width = '40px';
-                          icon.style.height = '40px';
-                          icon.style.objectFit = 'cover';
-                          icon.onerror = function() {
-                              // Fallback to default icon if image fails to load
-                              this.style.display = 'none';
-                              var parent = this.parentElement;
-                              if (parent) {
-                                  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                                  svg.setAttribute('class', 'toggle-user-menu');
-                                  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-                                  svg.setAttribute('style', 'padding-left: 1px;');
-                                  svg.setAttribute('width', '16px');
-                                  svg.setAttribute('height', '16px');
-                                  svg.setAttribute('aria-hidden', 'true');
-                                  svg.setAttribute('focusable', 'false');
-                                  svg.setAttribute('viewBox', '0 0 512 512');
-                                  
-                                  var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                                  path.setAttribute('fill', 'white');
-                                  path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
-                                  svg.appendChild(path);
-                                  
-                                  if (parent.style) {
-                                      parent.style.backgroundColor = '#bdbdbd';
-                                      parent.style.width = '40px';
-                                      parent.style.height = '40px';
-                                      parent.style.display = 'flex';
-                                      parent.style.alignItems = 'center';
-                                      parent.style.justifyContent = 'center';
-                                      parent.style.borderRadius = '50%';
-                                  }
-                                  
-                                  parent.appendChild(svg);
-                              }
-                          };
-                      });
-                  }
-              })
-              .catch(function(error) {
-                  console.error('Error fetching user image:', error);
-                  // On error, show default icon with #bdbdbd background
-                  userIcons.forEach(function(icon) {
-                      icon.style.display = 'none';
-                      var parent = icon.parentElement;
-                      if (parent) {
-                          var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                          svg.setAttribute('class', 'toggle-user-menu');
-                          svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-                          svg.setAttribute('style', 'padding-left: 1px;');
-                          svg.setAttribute('width', '16px');
-                          svg.setAttribute('height', '16px');
-                          svg.setAttribute('aria-hidden', 'true');
-                          svg.setAttribute('focusable', 'false');
-                          svg.setAttribute('viewBox', '0 0 512 512');
-                          
-                          var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                          path.setAttribute('fill', 'white');
-                          path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
-                          svg.appendChild(path);
-                          
-                          if (parent.style) {
-                              parent.style.backgroundColor = '#bdbdbd';
-                              parent.style.width = '40px';
-                              parent.style.height = '40px';
-                              parent.style.display = 'flex';
-                              parent.style.alignItems = 'center';
-                              parent.style.justifyContent = 'center';
-                              parent.style.borderRadius = '50%';
-                          }
-                          
-                          parent.appendChild(svg);
-                      }
-                  });
-              });
-          }
-          
-          // Wait for DOM to be ready
-          if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', loadUserImages);
-          } else {
-              // DOM is already ready
-              loadUserImages();
-          }
-      })();
+    var username = "${username | n, js_escaped_string}";
+    window.username = username;
   </script>
   % endif
+  <script src="${static.url('js/header.js')}"></script>
   <div class="header-bar"></div>
   <div style="box-shadow: 0px 6px 4px -4px #cccccc; position: relative; z-index: 1001; background-color: white;">
       <div class="header-container">
@@ -209,6 +53,9 @@
               <a class="header-navigation-link" href="https://recursos.redfid.cl" target="_self">
                   <p class="header-navigation-link-label" style="margin: revert;">Recursos</p>
               </a>
+              <a class="header-navigation-link" href="https://www.redfid.cl/eventos" target="_self">
+                <p class="header-navigation-link-label" style="margin: revert;">Noticias y Eventos</p>
+            </a>
           </div>
           <div>
               <a class="header-navigation-logo-mobile" href="/" target="_self">
@@ -223,12 +70,7 @@
               </div>
           % else:
           <div class="hide-on-desktop toggle-user-menu time-to-get-ill" style="background-color: #40b4ba; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-              <svg class="toggle-user-menu" xmlns="http://www.w3.org/2000/svg" style="padding-left: 1px;" width="16px" height="16px" aria-hidden="true" focusable="false" viewBox="0 0 512 512">
-                <path
-                  fill="white"
-                  d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
-                  />
-              </svg>
+              <img class="toggle-user-menu" src="${static.url('assets/user-icon.svg')}" alt="" width="16" height="16" style="padding-left: 1px;" aria-hidden="true">
             </div>
           % endif
           <div class="header-login-container">
@@ -241,12 +83,7 @@
               % else:
               <a class="register-button" href="https://www.redfid.cl/formulario-de-registro" target="_self">Regístrate</a>
               <div class="toggle-user-menu time-to-get-ill" style="background-color: #40b4ba; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                  <svg class="toggle-user-menu" xmlns="http://www.w3.org/2000/svg" style="padding-left: 1px;" width="16px" height="16px" aria-hidden="true" focusable="false" viewBox="0 0 512 512">
-                    <path
-                      fill="white"
-                      d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
-                      />
-                  </svg>
+                  <img class="toggle-user-menu" src="${static.url('assets/user-icon.svg')}" alt="" width="16" height="16" style="padding-left: 1px;" aria-hidden="true">
                 </div>
               % endif
           </div>
@@ -306,6 +143,9 @@
       </a>
       <a class="header-navigation-link-mobile" href="https://recursos.redfid.cl" target="_self">
           Recursos
+      </a>
+      <a class="header-navigation-link-mobile" href="https://www.redfid.cl/eventos" target="_self">
+        Noticias y Eventos
       </a>
   </div>
 </header>

@@ -136,9 +136,8 @@ function toggleUserMenu() {
 // Use addEventListener to avoid overriding other resize handlers
 (function() {
     function handleResize(event) {
-        var screenWidth = window.innerWidth;
         var navContainer = document.querySelector('.header-navigation-container-mobile');
-        if (screenWidth > 940) {
+        if (window.matchMedia("(min-width: 940px)").matches) {
             navContainer.style.display = 'none';
             document.querySelector('.header-navigation-container-mobile').style.display = 'none';
             document.querySelector('.header-user-container-mobile').style.display = 'none';
@@ -155,5 +154,124 @@ function toggleUserMenu() {
             if (oldOnResize) oldOnResize(event);
             handleResize(event);
         };
+    }
+})();
+
+(function() {
+    var username = window.username;
+    var api_url = window.api_url;
+    var static_url = window.static_url;
+    var user_icon_url = window.user_icon_url;
+
+    function appendUserIconFallback(parent) {
+        if (!parent || !user_icon_url) return;
+        var img = document.createElement('img');
+        img.setAttribute('class', 'toggle-user-menu');
+        img.setAttribute('src', user_icon_url);
+        img.setAttribute('alt', '');
+        img.setAttribute('width', '16');
+        img.setAttribute('height', '16');
+        img.setAttribute('style', 'padding-left: 1px;');
+        img.setAttribute('aria-hidden', 'true');
+        if (parent.style) {
+            parent.style.backgroundColor = '#bdbdbd';
+            parent.style.width = '40px';
+            parent.style.height = '40px';
+            parent.style.display = 'flex';
+            parent.style.alignItems = 'center';
+            parent.style.justifyContent = 'center';
+            parent.style.borderRadius = '50%';
+        }
+        parent.appendChild(img);
+    }
+
+    function loadUserImages() {
+        var userIcons = document.querySelectorAll('.header-usericon');
+        
+        if (userIcons.length === 0) {
+            // Elements not ready yet, try again after a short delay
+            setTimeout(loadUserImages, 100);
+            return;
+        }
+    
+        // Fetch user image from API
+        fetch(api_url + '/user-image/' + username)
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            var imageUrl = data.url;
+            
+            if (!imageUrl || imageUrl === '' || imageUrl === null) {
+                // If no URL, show the same as when not logged in, but with #bdbdbd background
+                userIcons.forEach(function(icon) {
+                    var parent = icon.parentElement;
+                    if (parent) {
+                        icon.style.display = 'none';
+                        appendUserIconFallback(parent);
+                    }
+                });
+            } else {
+                // If URL exists, load the image
+                var fullImageUrl = static_url + '/api/users' + imageUrl;
+                userIcons.forEach(function(icon) {
+                    var parent = icon.parentElement;
+                    // Ensure parent has proper styling for image display
+                    if (parent && parent.style) {
+                        parent.style.width = '40px';
+                        parent.style.height = '40px';
+                        parent.style.borderRadius = '50%';
+                        parent.style.overflow = 'hidden';
+                        parent.style.display = 'flex';
+                        parent.style.alignItems = 'center';
+                        parent.style.justifyContent = 'center';
+                        // Remove the default background color
+                        parent.style.backgroundColor = '';
+                    }
+                    icon.src = fullImageUrl;
+                    icon.style.display = '';
+                    icon.style.width = '40px';
+                    icon.style.height = '40px';
+                    icon.style.objectFit = 'cover';
+                    icon.onerror = function() {
+                        // Fallback to default icon if image fails to load
+                        this.style.display = 'none';
+                        appendUserIconFallback(this.parentElement);
+                    };
+                });
+            }
+        })
+        .catch(function(error) {
+            console.error('Error fetching user image:', error);
+            // On error, show default icon with #bdbdbd background
+            userIcons.forEach(function(icon) {
+                icon.style.display = 'none';
+                appendUserIconFallback(icon.parentElement);
+            });
+        });
+    }
+    
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadUserImages);
+    } else {
+        // DOM is already ready
+        if (!api_url) {
+            console.error('API URL is not set');
+            return;
+        }
+        else if (!static_url) {
+            console.error('Static URL is not set');
+            return;
+        }
+        else if (!username) {
+            return;
+        }
+        else {
+            loadUserImages();
+        }
     }
 })();
