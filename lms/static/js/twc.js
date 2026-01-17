@@ -3,10 +3,11 @@ $(document).ready(function() {
     let displayId = getUrlParameter("displayId");
     if (display != null) {
         if (display === "1" || display === "2" || display === "3") {
-            if (displayId == null || isNaN(parseInt(displayId))) {
-                showTalleresWebinarsCapsulas(display, 0);
+            // Handle both numeric IDs and UUIDs - keep as string, use null for default
+            if (displayId == null || displayId === "" || displayId === "0") {
+                showTalleresWebinarsCapsulas(display, null);
             } else {
-                showTalleresWebinarsCapsulas(display, parseInt(displayId));
+                showTalleresWebinarsCapsulas(display, displayId);
             }
         } else if (display === "100") {
             showVideoCurso(displayId);
@@ -89,22 +90,34 @@ function showVideoCurso(displayId) {
 function showTalleresWebinarsCapsulas(display, displayId) {
     $("#dashboard-main").hide();
     if (display === "1"){
-        $.getJSON('https://api.redfid.cl/get_talleresywebinars', function(data){
+        $.getJSON('https://api.redfid.cl/talleres', function(data){
             let filter = getUrlParameter("filter");    
-            items = getAndClassifyItems(data.talleresywebinars, displayId, filter);
-            if (displayId === 0 && items["defaultItem"] != null) {
-                setUrlParameter('displayId', items["defaultItem"]["id"]);
+            items = getAndClassifyItems(data, displayId, filter);
+            // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
+            if (displayId == null && items["defaultItem"] != null && items["active"] != null) {
+                const currentDisplayId = getUrlParameter("displayId");
+                const defaultIdStr = String(items["defaultItem"]["id"]);
+                // Only update if the current URL parameter doesn't match
+                if (currentDisplayId !== defaultIdStr) {
+                    setUrlParameter('displayId', items["defaultItem"]["id"]);
+                }
             }
             fillTalleres(items);
         }).fail(function(jqXHR, textStatus, errorThrown) {
             fillTalleres({"active": null, "default": null, "summarizedItems": []});
         });
     } else if (display === "2") {
-        $.getJSON('https://api.redfid.cl/get_capsulas', function(data){
+        $.getJSON('https://api.redfid.cl/capsulas', function(data){
             let filter = getUrlParameter("filter");    
-            items = getAndClassifyItems(data.capsulas.capsulas, displayId, filter);
-            if (displayId === 0 && items["defaultItem"] != null) {
-                setUrlParameter('displayId', items["defaultItem"]["id"]);
+            items = getAndClassifyItems(data.capsulas, displayId, filter);
+            // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
+            if (displayId == null && items["defaultItem"] != null && items["active"] != null) {
+                const currentDisplayId = getUrlParameter("displayId");
+                const defaultIdStr = String(items["defaultItem"]["id"]);
+                // Only update if the current URL parameter doesn't match
+                if (currentDisplayId !== defaultIdStr) {
+                    setUrlParameter('displayId', items["defaultItem"]["id"]);
+                }
             }
             fillCapsulas(items);
         }).fail(function(jqXHR, textStatus, errorThrown) {
@@ -134,10 +147,10 @@ function hideTalleresWebinarsCapsulas() {
 }
 
 function fillCreateCapsula() {
-    $.getJSON('https://api.redfid.cl/get_attributes', function(data){
+    $.getJSON('https://api.redfid.cl/universities.json', function(data){
         let institutionOptions = '';
-        for (let key of Object.keys(data.attributes.university.options)) {
-            institutionOptions += `<option value="${key}">${data.attributes.university.options[key]}</option>`;
+        for (let key of Object.keys(data)) {
+            institutionOptions += `<option value="${key}">${data[key]}</option>`;
         }
         $("#twc-main").html(`
         <a class="back-to-landing-button" href="/dashboard">
@@ -175,12 +188,12 @@ function fillCreateCapsula() {
             </div>
         </div>
         <div class="twc-download-template-container">
-            <a id="twc-download-template" target="_self">
+            <a id="twc-download-template" target="_blank">
                 Descargar plantilla
             </a>
         </div>
         <div class="twc-download-instructions-container">
-            <a class="download-capsula-instructions" href="https://api.redfid.cl/get_capsulas_doc" download="">
+            <a class="download-capsula-instructions" href="https://static.redfid.cl/api/capsulas/instrucciones.pdf" target="_blank">
                 <i class="fa fa-arrow-down" aria-hidden="true"></i>
                 Instrucciones para grabación
             </a>
@@ -214,8 +227,7 @@ function fillCreateCapsula() {
             }
             if (categoryValue !== 'waiting' && institutionValue !== 'waiting') {
                 downloadLink.disabled = false;
-                downloadLink.href = `https://api.redfid.cl/get_capsula_template/${categoryValue.toUpperCase()}/${institutionValue}`;
-                downloadLink.setAttribute('download', '');
+                downloadLink.href = `https://static.redfid.cl/api/capsulas/templates/${categoryValue.toUpperCase()}_${institutionValue}.potx`;
             } else {
                 downloadLink.disabled = true;
             }
@@ -289,13 +301,13 @@ function fillTalleres(items){
             $(".twc-content-error-container").show();
         } else {
             $(".twc-content-title").text(items.active.title);
-            $(".twc-content-date").text(items.active.date);
+            $(".twc-content-date").text(formatDate(items.active.date));
             var videoEmbed = `<iframe src="${convertToEmbedUrl(items.active.video_url)}" frameborder="0" allowfullscreen></iframe>`;
             $(".twc-content-tag").css("background-color", items.active.kind === "taller" ? "#40b4ba" : "#eb947e");
             $(".twc-content-tag").text(items.active.kind);
             $(".twc-content-video-container").append(videoEmbed);
             $(".twc-content-description").text(items.active.description);
-            $(".twc-content-exposes").text(items.active.exposes);
+            $(".twc-content-exposes").text(items.active.expositor);
         }
         if (items.summarizedItems.length !== 0) {
             var first = true;
@@ -311,12 +323,12 @@ function fillTalleres(items){
                     <div class="twc-summary-element">
                         <div class="twc-summary-element-right">
                             <a href="/dashboard?display=1&displayId=${item.id}" target="_self"><h1 class="twc-summary-title">${item.title}</h1></a>
-                            <div class="twc-summary-date">${item.date}</div>
+                            <div class="twc-summary-date">${formatDate(item.date)}</div>
                             <p class="twc-summary-description">${item.description}</p>
                             <div style="text-align: center; margin: 10px 0 20px 0;">
                                 <a href="/dashboard?display=1&amp;displayId=${item.id}" style=" color: white !important;  background-color: ${item.kind === "webinar" ? "#eb947e" : "#40b4ba"} !important; padding: 5px 15px; border-radius: 5px; font-family: 'Avenir Heavy' !important; font-size: 0.85em;">Ver ${item.kind}</a>
                             </div>
-                            <p class="twc-summary-exposes">${item.exposes}</p>
+                            <p class="twc-summary-exposes">${item.expositor}</p>
                         </div>
                     </div>
                 `);
@@ -372,15 +384,15 @@ function fillCapsulas(items){
             $(".twc-content-error-container").show();
         } else {
             $(".twc-content-title").text(items.active.title);
-            $(".twc-content-date").text(items.active.date);
+            $(".twc-content-date").text(formatDate(items.active.date));
             var videoEmbed = `<iframe src="${convertToEmbedUrl(items.active.video_url)}" frameborder="0" allowfullscreen></iframe>`;
             $(".twc-content-video-container").append(videoEmbed);
             $(".twc-content-subtitle-container").append(`
             <div class="twc-content-tag" style="background-color: ${CAPSULAS[items.active.kind]["color"]};">${CAPSULAS[items.active.kind]["name"]}</div>
             `);
             $(".twc-content-description").text(items.active.description);
-            $(".twc-content-exposes").text(items.active.exposes);
-            $(".twc-content-exposes-subtitle").text(items.active.exposes_subtitle);
+            $(".twc-content-exposes").text(items.active.expositor);
+            $(".twc-content-exposes-subtitle").text(items.active.expositor_subtitle);
         }
         if (items.summarizedItems.length !== 0) {
             var first = true;
@@ -396,12 +408,12 @@ function fillCapsulas(items){
                     <div class="twc-summary-element">
                         <div class="twc-summary-element-right">
                             <a href="/dashboard?display=2&displayId=${item.id}" target="_self"><h1 class="twc-summary-title">${item.title}</h1></a>
-                            <div class="twc-summary-date">${item.date}</div>
+                            <div class="twc-summary-date">${formatDate(item.date)}</div>
                             <p class="twc-summary-description">${item.description}</p>
                             <div class="twc-summary-subtitle-container">
                                 <div class="twc-summary-tag" style="background-color: ${CAPSULAS[item.kind]["color"]};">${CAPSULAS[item.kind]["name"]}</div>
                             </div>
-                            <p class="twc-summary-exposes">${item.exposes}</p>
+                            <p class="twc-summary-exposes">${item.expositor}</p>
                         </div>
                     </div>
                 `);
@@ -450,8 +462,13 @@ function getAndClassifyItems(data, displayId, filter){
     activeItem = null;
     defaultItem = null;
     summarizedItems = [];
+    // Normalize displayId to string for comparison (handles both numeric IDs and UUIDs)
+    const displayIdStr = displayId == null ? null : String(displayId);
     data.forEach((item, index) => {
-        if (item.id === displayId){
+        // Normalize item.id to string for comparison
+        const itemIdStr = String(item.id);
+        // Compare as strings to handle both numeric IDs and UUIDs
+        if (displayIdStr != null && itemIdStr === displayIdStr){
             activeItem = item;
         }
         if (defaultItem == null){
@@ -462,15 +479,31 @@ function getAndClassifyItems(data, displayId, filter){
         }
         summarizedItems.push(item);
     });
-    if (activeItem == null && displayId === 0){
+    // If no active item found and displayId is null/0, use default
+    if (activeItem == null && displayIdStr == null){
         activeItem = defaultItem;
     }
     if (activeItem != null){
+        const activeItemIdStr = String(activeItem.id);
         summarizedItems = summarizedItems.filter(function(item) {
-            return item.id !== activeItem.id;
+            const itemIdStr = String(item.id);
+            return itemIdStr !== activeItemIdStr;
         });
     }
     return {"active": activeItem, "summarizedItems": summarizedItems, "defaultItem": defaultItem}
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const months = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} de ${month} de ${year}`;
 }
 
 function convertToEmbedUrl(youtubeUrl) {
