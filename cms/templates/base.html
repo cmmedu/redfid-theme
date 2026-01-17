@@ -8,14 +8,18 @@
 ## Standard imports
 <%namespace name='static' file='static_content.html'/>
 <%!
+from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangolib.js_utils import (
     dump_js_escaped_json, js_escaped_string
 )
 from openedx.core.djangolib.markup import HTML
 from openedx.core.release import RELEASE_LINE
+
+from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 %>
 
 <%page expression_filter="h"/>
@@ -26,6 +30,31 @@ from openedx.core.release import RELEASE_LINE
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="openedx-release-line" content="${RELEASE_LINE}" />
+    <%
+      is_user_authenticated = user.is_authenticated if user else False
+      current_path_for_js = urlquote(request.path if request else '/')
+      api_url = configuration_helpers.get_value('redfid_api_url', '')
+      cookie_domain = configuration_helpers.get_value('redfid_cookie_domain', '.redfid.cl')
+      # Check if redfid provider exists and is enabled
+      try:
+        redfid_provider = OAuth2ProviderConfig.objects.current_set().filter(backend_name='redfid', enabled=True).first()
+        redfid_login_enabled = redfid_provider is not None
+      except:
+        redfid_login_enabled = False
+    %>
+    <script>
+      var api_url = "${api_url | n, js_escaped_string}";
+      window.api_url = api_url;
+      var cookie_domain = "${cookie_domain | n, js_escaped_string}";
+      window.cookie_domain = cookie_domain;
+      var redfidLoginEnabled = ${'true' if redfid_login_enabled else 'false'};
+      window.redfidLoginEnabled = redfidLoginEnabled;
+      var isAuthenticated = ${'true' if is_user_authenticated else 'false'};
+      window.isAuthenticated = isAuthenticated;
+      var currentPathEncoded = "${current_path_for_js | n, js_escaped_string}";
+      window.currentPathEncoded = currentPathEncoded;
+    </script>
+    <script src="${static.url('js/redfid_oauth2.js')}"></script>
     <meta name="robots" content="noindex" />
     <title>RedFID | Studio</title>
     <link rel="stylesheet" href="${static.url('css/studio.css')}">
@@ -59,7 +88,6 @@ from openedx.core.release import RELEASE_LINE
     <link rel="apple-touch-icon" href="${static.url('images/apple-touch-icon.png')}">
     <link rel="icon" href="${static.url('images/android-chrome-192x192.png')}" sizes="192x192" type="image/png">
     <link rel="icon" href="${static.url('images/android-chrome-512x512.png')}" sizes="512x512" type="image/png">
-    <script type="text/javascript" src="${static.url('js/header.js')}"></script>
     <%static:css group='style-vendor'/>
     <%static:css group='style-vendor-tinymce-content'/>
     <%static:css group='style-vendor-tinymce-skin'/>

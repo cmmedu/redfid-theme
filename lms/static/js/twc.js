@@ -90,7 +90,7 @@ function showVideoCurso(displayId) {
 function showTalleresWebinarsCapsulas(display, displayId) {
     $("#dashboard-main").hide();
     if (display === "1"){
-        $.getJSON('https://api.redfid.cl/talleres', function(data){
+        $.getJSON((window.api_url || 'https://api.redfid.cl') + '/talleres', function(data){
             let filter = getUrlParameter("filter");    
             items = getAndClassifyItems(data, displayId, filter);
             // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
@@ -107,7 +107,7 @@ function showTalleresWebinarsCapsulas(display, displayId) {
             fillTalleres({"active": null, "default": null, "summarizedItems": []});
         });
     } else if (display === "2") {
-        $.getJSON('https://api.redfid.cl/capsulas', function(data){
+        $.getJSON((window.api_url || 'https://api.redfid.cl') + '/capsulas', function(data){
             let filter = getUrlParameter("filter");    
             items = getAndClassifyItems(data.capsulas, displayId, filter);
             // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
@@ -147,7 +147,7 @@ function hideTalleresWebinarsCapsulas() {
 }
 
 function fillCreateCapsula() {
-    $.getJSON('https://api.redfid.cl/universities.json', function(data){
+    $.getJSON((window.api_url || 'https://api.redfid.cl') + '/universities.json', function(data){
         let institutionOptions = '';
         for (let key of Object.keys(data)) {
             institutionOptions += `<option value="${key}">${data[key]}</option>`;
