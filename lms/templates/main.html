@@ -37,8 +37,8 @@ from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
     <script>
       var _paq = window._paq = window._paq || [];
       /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-      _paq.push(["setCookieDomain", "*.www.redfid.cl"]);
-      _paq.push(["setDomains", ["*.www.redfid.cl","*.admin.redfid.cl","*.comunidades.redfid.cl","*.cursos.redfid.cl","*.recursos.redfid.cl"]]);
+      _paq.push(["setCookieDomain", "*.redfid.cl"]);
+      _paq.push(["setDomains", ["*.redfid.cl","*.admin.redfid.cl","*.comunidades.redfid.cl","*.cursos.redfid.cl","*.recursos.redfid.cl","*.dashboard.redfid.cl"]]);
       _paq.push(['trackPageView']);
       _paq.push(['enableLinkTracking']);
       (function() {
@@ -55,8 +55,8 @@ from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
   <%
     is_user_authenticated = user.is_authenticated if user else False
     current_path_for_js = urlquote(request.path if request else '/')
-    api_url = configuration_helpers.get_value('redfid_api_url', '')
-    cookie_domain = configuration_helpers.get_value('redfid_cookie_domain', '.redfid.cl')
+    api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+    cookie_domain = configuration_helpers.get_value('REDFID_COOKIE_DOMAIN', '.redfid.cl')
     # Check if redfid provider exists and is enabled
     try:
       redfid_provider = OAuth2ProviderConfig.objects.current_set().filter(backend_name='redfid', enabled=True).first()
