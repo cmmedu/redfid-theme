@@ -20,6 +20,7 @@ from openedx.core.djangolib.js_utils import js_escaped_string
 from lms.djangoapps.branding import api as branding_api
 from openedx.core.djangoapps.lang_pref.api import header_language_selector_is_enabled, released_languages
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 
 %>
 
@@ -291,7 +292,14 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
     </div>
     <%
     current_path = request.path if request else '/'
-    redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}"
+    # Check if redfid provider exists and is enabled
+    try:
+      redfid_provider = OAuth2ProviderConfig.objects.current_set().filter(backend_name='redfid', enabled=True).first()
+      redfid_login_enabled = redfid_provider is not None
+    except:
+      redfid_login_enabled = False
+    
+    redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}" if redfid_login_enabled else "#"
     %>
     <div class="header-user-container-mobile" style="display: none;">
         % if user.is_authenticated:

@@ -11,6 +11,7 @@
   from openedx.core.djangolib.js_utils import js_escaped_string
 
   from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+  from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
   lms_base = configuration_helpers.get_value('LMS_BASE', settings.LMS_BASE)
   api_url = configuration_helpers.get_value('redfid_api_url', '')
 %>
@@ -265,7 +266,14 @@
       % else:
       <%
           current_path = request.path if request else '/'
-          redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}"
+          # Check if redfid provider exists and is enabled
+          try:
+            redfid_provider = OAuth2ProviderConfig.objects.current_set().filter(backend_name='redfid', enabled=True).first()
+            redfid_login_enabled = redfid_provider is not None
+          except:
+            redfid_login_enabled = False
+          
+          redfid_login_url = f"/auth/login/redfid/?auth_entry=login&next={urlquote(current_path)}" if redfid_login_enabled else "#"
       %>
       <a class="header-navigation-link-mobile" href="https://www.redfid.cl/formulario-de-registro" target="_self">
           Regístrate
