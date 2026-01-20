@@ -4,6 +4,7 @@
 <%!
 from django.utils.translation import ugettext as _
 from django.urls import reverse
+from django.utils.http import urlquote
 
 from openedx.core.djangolib.markup import HTML, Text
 %>
@@ -21,10 +22,10 @@ from openedx.core.djangolib.markup import HTML, Text
     <h1 class="landing-subtitle">Material audiovisual</h1>
     <div class="audiovisual-container">
       <div class="audiovisual-image">
-        <a href="/dashboard?display=1"><img src="${static.url('images/TW.png')}" style="width: 100%"></a>
+        <a href="/auth/login/redfid/?auth_entry=login&next=${urlquote('/dashboard?display=1')}"><img src="${static.url('images/TW.png')}" style="width: 100%"></a>
       </div>
       <div class="audiovisual-image">
-        <a href="/dashboard?display=2"><img src="${static.url('images/CP.png')}" style="width: 100%"></a>
+        <a href="/auth/login/redfid/?auth_entry=login&next=${urlquote('/dashboard?display=2')}"><img src="${static.url('images/CP.png')}" style="width: 100%"></a>
       </div>
     </div>
   </section>
