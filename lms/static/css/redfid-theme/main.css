@@ -1454,6 +1454,41 @@ a .logo {
   color: #40b4ba !important;
 }
 
+.twc-tabs-container {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #e0e0e0;
+  margin: 20px 0;
+}
+
+.twc-tab {
+  padding: 12px 24px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #646464;
+  font-family: 'Avenir Regular' !important;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.twc-tab:hover {
+  color: #40b4ba;
+  background-color: #f5f5f5;
+}
+
+.twc-tab-active {
+  color: #40b4ba !important;
+  border-bottom-color: #40b4ba !important;
+  font-family: 'Avenir Heavy' !important;
+}
+
 .ipd-video-iframe {
   position: relative;
   width: 100%;
