@@ -1,3 +1,4 @@
+-e git+https://github.com/cmmedu/iaa-xblock@v0.0.1#egg=iaa-xblock
 -e git+https://github.com/cmmedu/iterative-xblock.git@55549592fabcb4962b93682f6fc4379f0332503b#egg=iterative-xblock
 -e git+https://github.com/eol-uchile/edx-ora2.git@81fdd8c46e3abb1a4dda17f946e0b12d181a2078#egg=ora2
 -e git+https://github.com/eol-uchile/edx-sga@ee43f7993e6a81626fc3a4666cfa09fe3c2140cb#egg=edx-sga
@@ -16,4 +17,3 @@
 -e git+https://github.com/eol-uchile/xblock-drag-and-drop-v2@58d8a691cf9210220925f3d2957b39a377f6704c#egg=xblock-drag-and-drop-v2
 -e git+https://github.com/eol-uchile/xblock-in-video-quiz@1555dcbd96341f19b76f915f0135f46192869796#egg=xblock_in_video_quiz
 -e git+https://github.com/eol-uchile/xblock-lti-consumer@b1384343be9ae1a4d6de5760a3a5c1475a3024cf#egg=lti-consumer-xblock
--e git+https://github.com/REDFID/iaa-xblock@v0.0.1#egg=iaa-xblock
