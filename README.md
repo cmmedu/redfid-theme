@@ -1,7 +1,7 @@
-# norteamericano-edx
+# edx-redfid
 
-Open edX image to host Norteamericano edX instance.
+Open edX image to host RedFID edX instance.
 
 ### Software Dependencies Diagram
 
-![Edx Norteamericano component diagram](diagrams/diagram.svg)
+![Edx RedFID component diagram](diagrams/diagram.svg)
