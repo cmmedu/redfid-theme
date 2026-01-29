@@ -90,7 +90,7 @@ function showVideoCurso(displayId) {
 function showTalleresWebinarsCapsulas(display, displayId) {
     $("#dashboard-main").hide();
     if (display === "1"){
-        $.getJSON((window.api_url || 'https://api.redfid.cl') + '/talleres', function(data){
+        $.getJSON(window.api_url + '/talleres', function(data){
             let filter = getUrlParameter("filter");    
             items = getAndClassifyItems(data, displayId, filter);
             
@@ -121,7 +121,7 @@ function showTalleresWebinarsCapsulas(display, displayId) {
             fillTalleres({"active": null, "default": null, "summarizedItems": []}, []);
         });
     } else if (display === "2") {
-        $.getJSON((window.api_url || 'https://api.redfid.cl') + '/capsulas', function(data){
+        $.getJSON(window.api_url + '/capsulas', function(data){
             let filter = getUrlParameter("filter");    
             items = getAndClassifyItems(data, displayId, filter);
             // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
@@ -161,7 +161,7 @@ function hideTalleresWebinarsCapsulas() {
 }
 
 function fillCreateCapsula() {
-    $.getJSON((window.api_url || 'https://api.redfid.cl') + '/universities.json', function(data){
+    $.getJSON(window.api_url + '/universities.json', function(data){
         let institutionOptions = '';
         for (let key of Object.keys(data)) {
             institutionOptions += `<option value="${key}">${data[key]}</option>`;
@@ -207,7 +207,7 @@ function fillCreateCapsula() {
             </a>
         </div>
         <div class="twc-download-instructions-container">
-            <a class="download-capsula-instructions" href="https://static.redfid.cl/api/capsulas/instrucciones.pdf" target="_blank">
+            <a class="download-capsula-instructions" href="${window.static_url}/api/capsulas/instrucciones.pdf" target="_blank">
                 <i class="fa fa-arrow-down" aria-hidden="true"></i>
                 Instrucciones para grabación
             </a>
@@ -241,7 +241,7 @@ function fillCreateCapsula() {
             }
             if (categoryValue !== 'waiting' && institutionValue !== 'waiting') {
                 downloadLink.disabled = false;
-                downloadLink.href = `https://static.redfid.cl/api/capsulas/templates/${categoryValue.toUpperCase()}_${institutionValue}.potx`;
+                downloadLink.href = `${window.static_url}/api/capsulas/templates/${categoryValue.toUpperCase()}_${institutionValue}.potx`;
             } else {
                 downloadLink.disabled = true;
             }

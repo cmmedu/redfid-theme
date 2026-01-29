@@ -157,3 +157,182 @@ function toggleUserMenu() {
         };
     }
 })();
+
+(function() {
+    var username = window.username;
+    var api_url = window.api_url;
+    var static_url = window.static_url;
+    
+    function loadUserImages() {
+        var userIcons = document.querySelectorAll('.header-usericon');
+        
+        if (userIcons.length === 0) {
+            // Elements not ready yet, try again after a short delay
+            setTimeout(loadUserImages, 100);
+            return;
+        }
+    
+        // Fetch user image from API
+        fetch(api_url + '/user-image/' + username)
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            var imageUrl = data.url;
+            
+            if (!imageUrl || imageUrl === '' || imageUrl === null) {
+                // If no URL, show the same as when not logged in, but with #bdbdbd background
+                userIcons.forEach(function(icon) {
+                    var parent = icon.parentElement;
+                    if (parent) {
+                        // Replace img with SVG icon
+                        icon.style.display = 'none';
+                        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svg.setAttribute('class', 'toggle-user-menu');
+                        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('style', 'padding-left: 1px;');
+                        svg.setAttribute('width', '16px');
+                        svg.setAttribute('height', '16px');
+                        svg.setAttribute('aria-hidden', 'true');
+                        svg.setAttribute('focusable', 'false');
+                        svg.setAttribute('viewBox', '0 0 512 512');
+                        
+                        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('fill', 'white');
+                        path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                        svg.appendChild(path);
+                        
+                        // Update parent background color
+                        if (parent.style) {
+                            parent.style.backgroundColor = '#bdbdbd';
+                            parent.style.width = '40px';
+                            parent.style.height = '40px';
+                            parent.style.display = 'flex';
+                            parent.style.alignItems = 'center';
+                            parent.style.justifyContent = 'center';
+                            parent.style.borderRadius = '50%';
+                        }
+                        
+                        parent.appendChild(svg);
+                    }
+                });
+            } else {
+                // If URL exists, load the image
+                var fullImageUrl = static_url + '/api/users' + imageUrl;
+                userIcons.forEach(function(icon) {
+                    var parent = icon.parentElement;
+                    // Ensure parent has proper styling for image display
+                    if (parent && parent.style) {
+                        parent.style.width = '40px';
+                        parent.style.height = '40px';
+                        parent.style.borderRadius = '50%';
+                        parent.style.overflow = 'hidden';
+                        parent.style.display = 'flex';
+                        parent.style.alignItems = 'center';
+                        parent.style.justifyContent = 'center';
+                        // Remove the default background color
+                        parent.style.backgroundColor = '';
+                    }
+                    icon.src = fullImageUrl;
+                    icon.style.display = '';
+                    icon.style.width = '40px';
+                    icon.style.height = '40px';
+                    icon.style.objectFit = 'cover';
+                    icon.onerror = function() {
+                        // Fallback to default icon if image fails to load
+                        this.style.display = 'none';
+                        var parent = this.parentElement;
+                        if (parent) {
+                            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            svg.setAttribute('class', 'toggle-user-menu');
+                            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                            svg.setAttribute('style', 'padding-left: 1px;');
+                            svg.setAttribute('width', '16px');
+                            svg.setAttribute('height', '16px');
+                            svg.setAttribute('aria-hidden', 'true');
+                            svg.setAttribute('focusable', 'false');
+                            svg.setAttribute('viewBox', '0 0 512 512');
+                            
+                            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            path.setAttribute('fill', 'white');
+                            path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                            svg.appendChild(path);
+                            
+                            if (parent.style) {
+                                parent.style.backgroundColor = '#bdbdbd';
+                                parent.style.width = '40px';
+                                parent.style.height = '40px';
+                                parent.style.display = 'flex';
+                                parent.style.alignItems = 'center';
+                                parent.style.justifyContent = 'center';
+                                parent.style.borderRadius = '50%';
+                            }
+                            
+                            parent.appendChild(svg);
+                        }
+                    };
+                });
+            }
+        })
+        .catch(function(error) {
+            console.error('Error fetching user image:', error);
+            // On error, show default icon with #bdbdbd background
+            userIcons.forEach(function(icon) {
+                icon.style.display = 'none';
+                var parent = icon.parentElement;
+                if (parent) {
+                    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', 'toggle-user-menu');
+                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('style', 'padding-left: 1px;');
+                    svg.setAttribute('width', '16px');
+                    svg.setAttribute('height', '16px');
+                    svg.setAttribute('aria-hidden', 'true');
+                    svg.setAttribute('focusable', 'false');
+                    svg.setAttribute('viewBox', '0 0 512 512');
+                    
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('fill', 'white');
+                    path.setAttribute('d', 'M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z');
+                    svg.appendChild(path);
+                    
+                    if (parent.style) {
+                        parent.style.backgroundColor = '#bdbdbd';
+                        parent.style.width = '40px';
+                        parent.style.height = '40px';
+                        parent.style.display = 'flex';
+                        parent.style.alignItems = 'center';
+                        parent.style.justifyContent = 'center';
+                        parent.style.borderRadius = '50%';
+                    }
+                    
+                    parent.appendChild(svg);
+                }
+            });
+        });
+    }
+    
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadUserImages);
+    } else {
+        // DOM is already ready
+        if (!api_url) {
+            console.error('API URL is not set');
+            return;
+        }
+        else if (!static_url) {
+            console.error('Static URL is not set');
+            return;
+        }
+        else if (!username) {
+            return;
+        }
+        else {
+            loadUserImages();
+        }
+    }
+})();
