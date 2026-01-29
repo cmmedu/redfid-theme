@@ -40,8 +40,8 @@ from common.djangoapps.student.models import CourseEnrollment
 
 <%block name="js_extra">
   <%
-    api_url = configuration_helpers.get_value('redfid_api_url', '')
-    static_url = configuration_helpers.get_value('redfid_static_url', '')
+    api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+    static_url = configuration_helpers.get_value('REDFID_STATIC_URL', '')
   %>
   <script>
     var api_url = "${api_url | n, js_escaped_string}";

@@ -13,8 +13,8 @@
   from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
   from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
   lms_base = configuration_helpers.get_value('LMS_BASE', settings.LMS_BASE)
-  api_url = configuration_helpers.get_value('redfid_api_url', '')
-  static_url = configuration_helpers.get_value('redfid_static_url', '')
+  api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+  static_url = configuration_helpers.get_value('REDFID_STATIC_URL', '')
 %>
 <header id="header">
   <script>
