@@ -4,8 +4,10 @@
 <%!
 from django.utils.translation import ugettext as _
 from django.urls import reverse
+from django.utils.http import urlquote
 
 from openedx.core.djangolib.markup import HTML, Text
+from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 %>
 
 <main id="main" aria-label="Content" tabindex="-1">
@@ -19,12 +21,23 @@ from openedx.core.djangolib.markup import HTML, Text
     <h1 class="landing-subtitle">Cursos online</h1>
     <%include file="${courses_list}" />
     <h1 class="landing-subtitle">Material audiovisual</h1>
+    <%
+      # Check if redfid provider exists and is enabled
+      try:
+        redfid_provider = OAuth2ProviderConfig.objects.current_set().filter(backend_name='redfid', enabled=True).first()
+        redfid_login_enabled = redfid_provider is not None
+      except:
+        redfid_login_enabled = False
+      
+      redfid_login_url_1 = "/auth/login/redfid/?auth_entry=login&next=" + urlquote('/dashboard?display=1') if redfid_login_enabled else "#"
+      redfid_login_url_2 = "/auth/login/redfid/?auth_entry=login&next=" + urlquote('/dashboard?display=2') if redfid_login_enabled else "#"
+    %>
     <div class="audiovisual-container">
       <div class="audiovisual-image">
-        <a href="/dashboard?display=1"><img src="${static.url('images/TW.png')}" style="width: 100%"></a>
+        <a href="${redfid_login_url_1}"><img src="${static.url('images/TW.png')}" style="width: 100%"></a>
       </div>
       <div class="audiovisual-image">
-        <a href="/dashboard?display=2"><img src="${static.url('images/CP.png')}" style="width: 100%"></a>
+        <a href="${redfid_login_url_2}"><img src="${static.url('images/CP.png')}" style="width: 100%"></a>
       </div>
     </div>
   </section>
