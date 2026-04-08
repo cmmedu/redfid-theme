@@ -321,7 +321,7 @@ function fillTalleres(items, allTalleres){
     <div class="twc-tabs-container">
         <div class="twc-tab ${activeCategory === 'matematica' ? 'twc-tab-active' : ''}" data-category="matematica">Matemática</div>
         <div class="twc-tab ${activeCategory === 'lenguaje' ? 'twc-tab-active' : ''}" data-category="lenguaje">Lenguaje</div>
-        <div class="twc-tab ${activeCategory === 'parvularia' ? 'twc-tab-active' : ''}" data-category="parvularia">Parvularia</div>
+        <div class="twc-tab ${activeCategory === 'parvularia' ? 'twc-tab-active' : ''}" data-category="parvularia">Educación Parvularia</div>
     </div>
     <div class="twc-container">
         <div class="twc-content">
@@ -422,7 +422,7 @@ function filterTalleresByCategory(category, allTalleres) {
     const categoryNames = {
         'matematica': 'Matemática',
         'lenguaje': 'Lenguaje',
-        'parvularia': 'Parvularia'
+        'parvularia': 'Educación Parvularia'
     };
     const categoryName = categoryNames[category] || category;
     
