@@ -363,8 +363,8 @@ function fillTalleres(items, allTalleres){
             $(".twc-content-title").text(items.active.title);
             $(".twc-content-date").text(formatDate(items.active.date));
             var videoEmbed = `<iframe src="${convertToEmbedUrl(items.active.video_url)}" frameborder="0" allowfullscreen></iframe>`;
-            $(".twc-content-tag").css("background-color", items.active.kind === "taller" ? "#40b4ba" : "#eb947e");
-            $(".twc-content-tag").text(items.active.kind);
+            $(".twc-content-tag").css("background-color", items.active.kind === "webinar" ? "#eb947e" : items.active.kind === "taller" ? "#40b4ba" : items.active.kind === "encuentro-virtual" ? "#b0a227" : items.active.kind === "reunion-virtual" ? "#80b027" : "#000000");
+            $(".twc-content-tag").text(items.active.kind === "encuentro-virtual" ? "Encuentro virtual" : items.active.kind === "reunion-virtual" ? "Reunión virtual" : items.active.kind);
             $(".twc-content-video-container").append(videoEmbed);
             $(".twc-content-description").text(items.active.description);
             $(".twc-content-exposes").text(items.active.expositor);
@@ -379,6 +379,12 @@ function fillTalleres(items, allTalleres){
                     $(".twc-summary").append('<h1 class="landing-subtitle" style="text-align: center !important;margin-top: 0 !important;">Anteriores</h1>')
                 }
                 first = false;
+                var itemKind = item.kind;
+                if (item.kind === "reunion-virtual") {
+                    itemKind = "reunión virtual";
+                } else if (item.kind === "encuentro-virtual") {
+                    itemKind = "encuentro virtual";
+                }
                 $(".twc-summary").append(`
                     <div class="twc-summary-element">
                         <div class="twc-summary-element-right">
@@ -386,7 +392,7 @@ function fillTalleres(items, allTalleres){
                             <div class="twc-summary-date">${formatDate(item.date)}</div>
                             <p class="twc-summary-description">${item.description}</p>
                             <div style="text-align: center; margin: 10px 0 20px 0;">
-                                <a href="/dashboard?display=1&amp;displayId=${item.id}" style=" color: white !important;  background-color: ${item.kind === "webinar" ? "#eb947e" : "#40b4ba"} !important; padding: 5px 15px; border-radius: 5px; font-family: 'Avenir Heavy' !important; font-size: 0.85em;">Ver ${item.kind}</a>
+                                <a href="/dashboard?display=1&amp;displayId=${item.id}" style=" color: white !important;  background-color: ${item.kind === "webinar" ? "#eb947e" : item.kind === "taller" ? "#40b4ba" : item.kind === "encuentro-virtual" ? "#b0a227" : item.kind === "reunion-virtual" ? "#80b027" : "#000000"} !important; padding: 5px 15px; border-radius: 5px; font-family: 'Avenir Heavy' !important; font-size: 0.85em;">Ver ${itemKind}</a>
                             </div>
                             <p class="twc-summary-exposes">${item.expositor}</p>
                         </div>
