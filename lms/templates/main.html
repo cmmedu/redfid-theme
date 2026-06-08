@@ -56,6 +56,7 @@ from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
     is_user_authenticated = user.is_authenticated if user else False
     current_path_for_js = urlquote(request.path if request else '/')
     api_url = configuration_helpers.get_value('REDFID_API_URL', '')
+    static_url = configuration_helpers.get_value('REDFID_STATIC_URL', '')
     cookie_domain = configuration_helpers.get_value('REDFID_COOKIE_DOMAIN', '.redfid.cl')
     # Check if redfid provider exists and is enabled
     try:
@@ -67,6 +68,8 @@ from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
   <script>
       var api_url = "${api_url | n, js_escaped_string}";
       window.api_url = api_url;
+      var static_url = "${static_url | n, js_escaped_string}";
+      window.static_url = static_url;
       var cookie_domain = "${cookie_domain | n, js_escaped_string}";
       window.cookie_domain = cookie_domain;
       var redfidLoginEnabled = ${'true' if redfid_login_enabled else 'false'};
