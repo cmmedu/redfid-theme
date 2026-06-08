@@ -26,6 +26,7 @@ const kindMap = {
     "reunion-virtual":  { label: "Reunión virtual",    color: "#80b027" }
 };
 
+
 CAPSULAS = {
     "rep": {
         "color": "#e36a5b",
@@ -97,19 +98,18 @@ function showVideoCurso(displayId) {
 function showTalleresWebinarsCapsulas(display, displayId) {
     $("#dashboard-main").hide();
     if (display === "1"){
-        $.getJSON(window.api_url + '/talleres', function(data){
-            let filter = getUrlParameter("filter");    
-            items = getAndClassifyItems(data, displayId, filter);
-            
+        $.getJSON(window.api_url + '/events', function(rawData){
+            const apKinds = Object.keys(kindMap);
+            const data = rawData.filter(e => apKinds.includes(e.kind) && e.visible);
+            let filter = getUrlParameter("filter");
+            let items = getAndClassifyItems(data, displayId, filter);
+
             // Filter summarizedItems by category of active/default item
             if (items["active"] != null || items["defaultItem"] != null) {
                 const categoryItem = items["active"] || items["defaultItem"];
-                if (categoryItem && categoryItem.category) {
-                    // Filter to only show talleres from the same category
-                    items["summarizedItems"] = items["summarizedItems"].filter(item => 
-                        item.category === categoryItem.category
-                    );
-                    // Sort by priority
+                const activeCategory = getEventCategory(categoryItem);
+                if (activeCategory) {
+                    items["summarizedItems"] = items["summarizedItems"].filter(item => item.ap_area === activeCategory);
                     items["summarizedItems"].sort((a, b) => (b.priority || 0) - (a.priority || 0));
                 }
             }
@@ -129,8 +129,8 @@ function showTalleresWebinarsCapsulas(display, displayId) {
         });
     } else if (display === "2") {
         $.getJSON(window.api_url + '/capsulas', function(data){
-            let filter = getUrlParameter("filter");    
-            items = getAndClassifyItems(data, displayId, filter);
+            let filter = getUrlParameter("filter");
+            let items = getAndClassifyItems(data, displayId, filter);
             // Only update URL if displayId was null/0 and we have a default item, and avoid infinite loop
             if (displayId == null && items["defaultItem"] != null && items["active"] != null) {
                 const currentDisplayId = getUrlParameter("displayId");
@@ -289,31 +289,19 @@ function fillTalleres(items, allTalleres){
     // If category is explicitly set (e.g., from tab click), use it
     if (items.activeCategory) {
         activeCategory = items.activeCategory;
-    } else if (items.active != null && items.active.category) {
-        activeCategory = items.active.category;
-    } else if (items.defaultItem != null && items.defaultItem.category) {
-        // If no active item but we have a default (latest), use its category
-        activeCategory = items.defaultItem.category;
+    } else if (items.active != null) {
+        activeCategory = getEventCategory(items.active);
+    } else if (items.defaultItem != null) {
+        activeCategory = getEventCategory(items.defaultItem);
     }
-    
-    // If still no category found and we have talleres, try to find first available category
+
+    // If still no category found and we have events, try to find first available category
     if (activeCategory == null && allTalleres && allTalleres.length > 0) {
-        // Find first taller with a category, prioritizing matematica, lenguaje, parvularia
         const categoryOrder = ['matematica', 'lenguaje', 'parvularia'];
         for (let cat of categoryOrder) {
-            const found = allTalleres.find(t => t.category === cat);
-            if (found) {
+            if (allTalleres.find(t => t.ap_area === cat)) {
                 activeCategory = cat;
                 break;
-            }
-        }
-        // If still not found, just use first available category
-        if (activeCategory == null) {
-            for (let taller of allTalleres) {
-                if (taller.category) {
-                    activeCategory = taller.category;
-                    break;
-                }
             }
         }
     }
@@ -368,14 +356,14 @@ function fillTalleres(items, allTalleres){
             $(".twc-content-error-container").show();
         } else {
             $(".twc-content-title").text(items.active.title);
-            $(".twc-content-date").text(formatDate(items.active.date));
+            $(".twc-content-date").text(formatDate(items.active.start_date));
             var videoEmbed = `<iframe src="${convertToEmbedUrl(items.active.video_url)}" frameborder="0" allowfullscreen></iframe>`;
             const activeKind = kindMap[items.active.kind] || { label: items.active.kind, color: "#000000" };
             $(".twc-content-tag").css("background-color", activeKind.color);
             $(".twc-content-tag").text(activeKind.label);
             $(".twc-content-video-container").append(videoEmbed);
-            $(".twc-content-description").text(items.active.description);
-            $(".twc-content-exposes").text(items.active.expositor);
+            $(".twc-content-description").html(stripScripts(items.active.description || ''));
+            $(".twc-content-exposes").html(getExpositorDisplay(items.active.expositors));
         }
         if (items.summarizedItems.length !== 0) {
             var first = true;
@@ -394,12 +382,12 @@ function fillTalleres(items, allTalleres){
                     <div class="twc-summary-element">
                         <div class="twc-summary-element-right">
                             <a href="/dashboard?display=1&displayId=${item.id}" target="_self"><h1 class="twc-summary-title">${item.title}</h1></a>
-                            <div class="twc-summary-date">${formatDate(item.date)}</div>
-                            <p class="twc-summary-description">${item.description}</p>
+                            <div class="twc-summary-date">${formatDate(item.start_date)}</div>
+                            <p class="twc-summary-description">${item.short_description || ''}</p>
                             <div style="text-align: center; margin: 10px 0 20px 0;">
                                 <a href="/dashboard?display=1&amp;displayId=${item.id}" style=" color: white !important;  background-color: ${bgColor} !important; padding: 5px 15px; border-radius: 5px; font-family: 'Avenir Heavy' !important; font-size: 0.85em;">Ver ${itemKind}</a>
                             </div>
-                            <p class="twc-summary-exposes">${item.expositor}</p>
+                            <p class="twc-summary-exposes">${getExpositorDisplay(item.expositors)}</p>
                         </div>
                     </div>
                 `);
@@ -426,8 +414,8 @@ function fillTalleres(items, allTalleres){
 }
 
 function filterTalleresByCategory(category, allTalleres) {
-    // Filter talleres by category
-    const categoryTalleres = allTalleres.filter(taller => taller.category === category);
+    // Filter events by category flag
+    const categoryTalleres = allTalleres.filter(taller => taller.ap_area === category);
     
     // Get category display name
     const categoryNames = {
@@ -584,9 +572,9 @@ function cleanURLParameters(){
 }
 
 function getAndClassifyItems(data, displayId, filter){
-    activeItem = null;
-    defaultItem = null;
-    summarizedItems = [];
+    let activeItem = null;
+    let defaultItem = null;
+    let summarizedItems = [];
     // Normalize displayId to string for comparison (handles both numeric IDs and UUIDs)
     const displayIdStr = displayId == null ? null : String(displayId);
     data.forEach((item, index) => {
@@ -630,6 +618,24 @@ function convertToEmbedUrl(youtubeUrl) {
         return 'https://www.youtube.com/embed/' + match[1];
     }
     return youtubeUrl;
+}
+
+function getExpositorDisplay(expositors) {
+    if (!expositors || expositors.length === 0) return '';
+    return expositors.map(ex => {
+        const name = ex.name || '';
+        const affiliation = ex.institutional_affiliation ? ` — ${ex.institutional_affiliation}` : '';
+        return `<span style="display:block; margin-bottom:6px;">${name}${affiliation}</span>`;
+    }).join('');
+}
+
+function getEventCategory(event) {
+    if (!event) return null;
+    return event.ap_area || null;
+}
+
+function stripScripts(html) {
+    return html.replace(/<script[\s\S]*?<\/script>/gi, '');
 }
 
 function convertToThumbnailUrl(youtubeUrl) {
